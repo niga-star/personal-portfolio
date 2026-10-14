@@ -1,0 +1,28 @@
+**/powershell.cmd
+.gemini/
+.vscode/
+.idea/
+
+# Backend
+Backend/vendor/
+Backend/.env
+Backend/.env.backup
+Backend/.env.production
+Backend/storage/*.key
+Backend/storage/logs/
+Backend/storage/framework/cache/
+Backend/storage/framework/sessions/
+Backend/storage/framework/views/
+Backend/bootstrap/cache/
+Backend/database/database.sqlite
+Backend/database/database.sqlite-journal
+
+# Frontend
+Frontend/node_modules/
+Frontend/dist/
+Frontend/.env.local
+Frontend/.env.*.local
+Frontend/npm-debug.log*
+Frontend/yarn-debug.log*
+Frontend/yarn-error.log*
+Frontend/pnpm-debug.log*
