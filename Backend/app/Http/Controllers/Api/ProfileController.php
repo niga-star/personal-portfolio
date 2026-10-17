@@ -91,8 +91,26 @@ class ProfileController extends Controller
     /**
      * FR-06: Download CV (PDF)
      */
-    public function downloadCv(): BinaryFileResponse|JsonResponse
+    public function downloadCv(): BinaryFileResponse|JsonResponse|\Illuminate\Http\RedirectResponse
     {
+        $profile = ProfileSetting::first();
+
+        if ($profile && ! empty($profile->cv_url)) {
+            $cvUrl = $profile->cv_url;
+            if (str_contains($cvUrl, '/storage/')) {
+                $relativePath = \Illuminate\Support\Str::after($cvUrl, '/storage/');
+                $customPath = storage_path('app/public/' . $relativePath);
+                if (file_exists($customPath)) {
+                    $fileName = ($profile->developer_name ? \Illuminate\Support\Str::slug($profile->developer_name) : 'Full-Stack-Developer') . '-CV.pdf';
+                    return response()->download($customPath, $fileName, [
+                        'Content-Type' => 'application/pdf',
+                    ]);
+                }
+            } elseif (filter_var($cvUrl, FILTER_VALIDATE_URL)) {
+                return redirect()->away($cvUrl);
+            }
+        }
+
         $path = storage_path('app/public/cv/developer-cv.pdf');
 
         if (! file_exists($path)) {

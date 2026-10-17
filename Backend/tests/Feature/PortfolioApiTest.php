@@ -274,5 +274,28 @@ class PortfolioApiTest extends TestCase
                 'data' => ['url', 'path', 'original_name'],
             ]);
     }
+
+    /**
+     * Test admin can upload PDF CV document
+     */
+    public function test_admin_can_upload_pdf_cv(): void
+    {
+        Storage::fake('public');
+
+        $user = User::where('email', 'admin@portfolio.com')->first();
+        $file = UploadedFile::fake()->create('custom-cv.pdf', 250, 'application/pdf');
+
+        $response = $this->actingAs($user, 'sanctum')->postJson('/api/v1/admin/upload', [
+            'file' => $file,
+            'folder' => 'cv',
+        ]);
+
+        $response->assertStatus(201)
+            ->assertJsonStructure([
+                'status',
+                'message',
+                'data' => ['url', 'path', 'original_name'],
+            ]);
+    }
 }
 
