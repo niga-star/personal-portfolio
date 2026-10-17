@@ -24,13 +24,14 @@ Route::prefix('v1')->group(function () {
     // Rate-limited contact submission (SRS 5.1: 5 req/min)
     Route::post('/contact', [ContactController::class, 'store'])->middleware('throttle:5,1');
 
-    // Authentication
-    Route::post('/auth/login', [AuthController::class, 'login']);
+    // Authentication with brute-force rate-limiting (5 attempts/min)
+    Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 
     // 5.2 Protected Admin Endpoints (Auth: Sanctum)
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/auth/user', [AuthController::class, 'user']);
         Route::post('/auth/logout', [AuthController::class, 'logout']);
+        Route::post('/admin/change-password', [AuthController::class, 'changePassword']);
 
         // Admin Projects CRUD
         Route::post('/admin/projects', [ProjectController::class, 'store']);

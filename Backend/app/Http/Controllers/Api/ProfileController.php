@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ExperienceRequest;
+use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\Experience;
 use App\Models\ProfileSetting;
 use Illuminate\Http\JsonResponse;
@@ -31,29 +33,10 @@ class ProfileController extends Controller
     /**
      * Admin: Update Profile Settings & Stats
      */
-    public function update(Request $request): JsonResponse
+    public function update(ProfileUpdateRequest $request): JsonResponse
     {
         $profile = ProfileSetting::firstOrCreate(['id' => 1]);
-
-        $validated = $request->validate([
-            'brand_name' => ['sometimes', 'string', 'max:100'],
-            'developer_name' => ['sometimes', 'string', 'max:255'],
-            'status_badge' => ['sometimes', 'string', 'max:255'],
-            'tagline' => ['sometimes', 'string', 'max:255'],
-            'hero_title' => ['sometimes', 'string', 'max:255'],
-            'hero_subtitle' => ['sometimes', 'string'],
-            'about_heading' => ['sometimes', 'string', 'max:255'],
-            'about_lead' => ['sometimes', 'string'],
-            'about_bio' => ['sometimes', 'string'],
-            'avatar_url' => ['sometimes', 'nullable', 'string'],
-            'cv_url' => ['sometimes', 'nullable', 'string'],
-            'email' => ['sometimes', 'email'],
-            'github_url' => ['sometimes', 'nullable', 'string'],
-            'linkedin_url' => ['sometimes', 'nullable', 'string'],
-            'telegram_url' => ['sometimes', 'nullable', 'string'],
-            'twitter_url' => ['sometimes', 'nullable', 'string'],
-            'stats' => ['sometimes', 'array'],
-        ]);
+        $validated = $request->validated();
 
         $profile->update($validated);
 
@@ -66,17 +49,9 @@ class ProfileController extends Controller
     /**
      * Admin: Store experience
      */
-    public function storeExperience(Request $request): JsonResponse
+    public function storeExperience(ExperienceRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'period' => ['required', 'string', 'max:100'],
-            'role_title' => ['required', 'string', 'max:255'],
-            'institution' => ['required', 'string', 'max:255'],
-            'type' => ['required', 'in:career,education'],
-            'description' => ['nullable', 'string'],
-            'sort_order' => ['integer'],
-        ]);
-
+        $validated = $request->validated();
         $exp = Experience::create($validated);
 
         return response()->json([
@@ -88,18 +63,10 @@ class ProfileController extends Controller
     /**
      * Admin: Update experience
      */
-    public function updateExperience(Request $request, int $id): JsonResponse
+    public function updateExperience(ExperienceRequest $request, int $id): JsonResponse
     {
         $exp = Experience::findOrFail($id);
-        $validated = $request->validate([
-            'period' => ['sometimes', 'string', 'max:100'],
-            'role_title' => ['sometimes', 'string', 'max:255'],
-            'institution' => ['sometimes', 'string', 'max:255'],
-            'type' => ['sometimes', 'in:career,education'],
-            'description' => ['nullable', 'string'],
-            'sort_order' => ['integer'],
-        ]);
-
+        $validated = $request->validated();
         $exp->update($validated);
 
         return response()->json([

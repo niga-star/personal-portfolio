@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ProjectRequest;
 use App\Models\Project;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -54,23 +55,9 @@ class ProjectController extends Controller
     /**
      * Admin: Store new project (SRS 5.2 - POST /api/v1/admin/projects)
      */
-    public function store(Request $request): JsonResponse
+    public function store(ProjectRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'category' => ['required', 'string', 'max:100'],
-            'summary' => ['required', 'string', 'max:500'],
-            'description' => ['required', 'string'],
-            'problem_solved' => ['nullable', 'string'],
-            'database_architecture' => ['nullable', 'string'],
-            'thumbnail_url' => ['nullable', 'url'],
-            'live_demo_url' => ['nullable', 'url'],
-            'github_url' => ['nullable', 'url'],
-            'is_featured' => ['boolean'],
-            'sort_order' => ['integer'],
-            'skill_ids' => ['nullable', 'array'],
-            'skill_ids.*' => ['exists:skills,id'],
-        ]);
+        $validated = $request->validated();
 
         $validated['slug'] = Str::slug($validated['title']) . '-' . Str::random(5);
         $skillIds = $validated['skill_ids'] ?? [];
@@ -90,25 +77,11 @@ class ProjectController extends Controller
     /**
      * Admin: Update existing project (SRS 5.2 - PUT /api/v1/admin/projects/{id})
      */
-    public function update(Request $request, int $id): JsonResponse
+    public function update(ProjectRequest $request, int $id): JsonResponse
     {
         $project = Project::findOrFail($id);
 
-        $validated = $request->validate([
-            'title' => ['sometimes', 'required', 'string', 'max:255'],
-            'category' => ['sometimes', 'required', 'string', 'max:100'],
-            'summary' => ['sometimes', 'required', 'string', 'max:500'],
-            'description' => ['sometimes', 'required', 'string'],
-            'problem_solved' => ['nullable', 'string'],
-            'database_architecture' => ['nullable', 'string'],
-            'thumbnail_url' => ['nullable', 'string'],
-            'live_demo_url' => ['nullable', 'string'],
-            'github_url' => ['nullable', 'string'],
-            'is_featured' => ['boolean'],
-            'sort_order' => ['integer'],
-            'skill_ids' => ['nullable', 'array'],
-            'skill_ids.*' => ['exists:skills,id'],
-        ]);
+        $validated = $request->validated();
 
         if (isset($validated['title']) && $validated['title'] !== $project->title) {
             $validated['slug'] = Str::slug($validated['title']) . '-' . Str::random(4);

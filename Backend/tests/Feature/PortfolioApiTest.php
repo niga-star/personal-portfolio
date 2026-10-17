@@ -166,4 +166,88 @@ class PortfolioApiTest extends TestCase
         $messagesResponse->assertStatus(200)
             ->assertJsonStructure(['status', 'data']);
     }
+
+    /**
+     * Test login validation failure (SRS 6.2)
+     */
+    public function test_login_fails_with_validation_errors(): void
+    {
+        $response = $this->postJson('/api/v1/auth/login', [
+            'email' => 'not-an-email',
+            'password' => '123',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['email', 'password']);
+    }
+
+    /**
+     * Test admin can change password
+     */
+    public function test_admin_can_change_password(): void
+    {
+        $user = User::where('email', 'admin@portfolio.com')->first();
+
+        $response = $this->actingAs($user, 'sanctum')->postJson('/api/v1/admin/change-password', [
+            'current_password' => 'Password123!',
+            'new_password' => 'NewStrongPass2026!',
+            'new_password_confirmation' => 'NewStrongPass2026!',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson(['message' => 'የይለፍ ቃል በተሳካ ሁኔታ ተቀይሯል (Password updated successfully)']);
+    }
+
+    /**
+     * Test admin can create, update and delete a skill
+     */
+    public function test_admin_can_manage_skills(): void
+    {
+        $user = User::where('email', 'admin@portfolio.com')->first();
+
+        // Create
+        $createRes = $this->actingAs($user, 'sanctum')->postJson('/api/v1/admin/skills', [
+            'name' => 'GraphQL',
+            'category' => 'backend',
+            'proficiency_percentage' => 88,
+        ]);
+
+        $createRes->assertStatus(201);
+        $skillId = $createRes->json('data.id');
+
+        // Update
+        $updateRes = $this->actingAs($user, 'sanctum')->putJson("/api/v1/admin/skills/{$skillId}", [
+            'proficiency_percentage' => 95,
+        ]);
+        $updateRes->assertStatus(200);
+
+        // Delete
+        $deleteRes = $this->actingAs($user, 'sanctum')->deleteJson("/api/v1/admin/skills/{$skillId}");
+        $deleteRes->assertStatus(200);
+    }
+
+    /**
+     * Test admin can create, update and delete an experience
+     */
+    public function test_admin_can_manage_experiences(): void
+    {
+        $user = User::where('email', 'admin@portfolio.com')->first();
+
+        // Create
+        $createRes = $this->actingAs($user, 'sanctum')->postJson('/api/v1/admin/experiences', [
+            'period' => '2024 - 2026',
+            'role_title' => 'Staff Platform Engineer',
+            'institution' => 'Fintech Next',
+            'type' => 'career',
+            'description' => 'Architecting real-time payment systems.',
+        ]);
+
+        $createRes->assertStatus(201);
+        $expId = $createRes->json('data.id');
+
+        // Delete
+        $deleteRes = $this->actingAs($user, 'sanctum')->deleteJson("/api/v1/admin/experiences/{$expId}");
+        $deleteRes->assertStatus(200);
+    }
 }
+

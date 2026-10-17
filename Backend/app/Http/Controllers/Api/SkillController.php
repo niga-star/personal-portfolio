@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\SkillRequest;
 use App\Models\Skill;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -34,16 +35,9 @@ class SkillController extends Controller
     /**
      * Admin: Store skill
      */
-    public function store(Request $request): JsonResponse
+    public function store(SkillRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:100', 'unique:skills,name'],
-            'category' => ['required', 'in:backend,frontend,database,tools'],
-            'proficiency_percentage' => ['required', 'integer', 'min:1', 'max:100'],
-            'icon_class' => ['nullable', 'string', 'max:100'],
-            'sort_order' => ['integer'],
-        ]);
-
+        $validated = $request->validated();
         $skill = Skill::create($validated);
 
         return response()->json([
@@ -55,18 +49,10 @@ class SkillController extends Controller
     /**
      * Admin: Update skill
      */
-    public function update(Request $request, int $id): JsonResponse
+    public function update(SkillRequest $request, int $id): JsonResponse
     {
         $skill = Skill::findOrFail($id);
-
-        $validated = $request->validate([
-            'name' => ['sometimes', 'required', 'string', 'max:100', 'unique:skills,name,' . $id],
-            'category' => ['sometimes', 'required', 'in:backend,frontend,database,tools'],
-            'proficiency_percentage' => ['sometimes', 'required', 'integer', 'min:1', 'max:100'],
-            'icon_class' => ['nullable', 'string', 'max:100'],
-            'sort_order' => ['integer'],
-        ]);
-
+        $validated = $request->validated();
         $skill->update($validated);
 
         return response()->json([

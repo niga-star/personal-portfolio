@@ -68,6 +68,8 @@
         :is-open="isAdminModalOpen"
         :current-profile="profile"
         :projects="projects"
+        :skills="skills"
+        :experiences="experiences"
         @close="isAdminModalOpen = false"
         @refresh-data="loadAllData"
       />

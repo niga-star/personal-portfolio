@@ -6,7 +6,7 @@ const apiClient = axios.create({
     'Accept': 'application/json',
     'Content-Type': 'application/json',
   },
-  timeout: 10000,
+  timeout: 15000,
 })
 
 // Attach Bearer token for protected Admin endpoints
@@ -19,6 +19,18 @@ apiClient.interceptors.request.use((config) => {
 }, (error) => {
   return Promise.reject(error)
 })
+
+// Response interceptor to handle session expiration (401 Unauthorized)
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem('portfolio_token')
+      window.dispatchEvent(new CustomEvent('auth:unauthorized'))
+    }
+    return Promise.reject(error)
+  }
+)
 
 export const api = {
   // Public Endpoints
@@ -51,8 +63,11 @@ export const api = {
   getCurrentUser() {
     return apiClient.get('/auth/user')
   },
+  changePassword(data) {
+    return apiClient.post('/admin/change-password', data)
+  },
 
-  // Admin Endpoints
+  // Admin Projects
   createProject(data) {
     return apiClient.post('/admin/projects', data)
   },
@@ -62,6 +77,30 @@ export const api = {
   deleteProject(id) {
     return apiClient.delete(`/admin/projects/${id}`)
   },
+
+  // Admin Skills
+  createSkill(data) {
+    return apiClient.post('/admin/skills', data)
+  },
+  updateSkill(id, data) {
+    return apiClient.put(`/admin/skills/${id}`, data)
+  },
+  deleteSkill(id) {
+    return apiClient.delete(`/admin/skills/${id}`)
+  },
+
+  // Admin Experiences & Education
+  createExperience(data) {
+    return apiClient.post('/admin/experiences', data)
+  },
+  updateExperience(id, data) {
+    return apiClient.put(`/admin/experiences/${id}`, data)
+  },
+  deleteExperience(id) {
+    return apiClient.delete(`/admin/experiences/${id}`)
+  },
+
+  // Admin Messages
   getMessages() {
     return apiClient.get('/admin/messages')
   },
@@ -71,6 +110,8 @@ export const api = {
   deleteMessage(id) {
     return apiClient.delete(`/admin/messages/${id}`)
   },
+
+  // Admin Profile Settings
   updateProfile(data) {
     return apiClient.put('/admin/profile', data)
   },
