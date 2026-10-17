@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class PortfolioApiTest extends TestCase
@@ -248,6 +250,29 @@ class PortfolioApiTest extends TestCase
         // Delete
         $deleteRes = $this->actingAs($user, 'sanctum')->deleteJson("/api/v1/admin/experiences/{$expId}");
         $deleteRes->assertStatus(200);
+    }
+
+    /**
+     * Test admin can upload image file
+     */
+    public function test_admin_can_upload_image_file(): void
+    {
+        Storage::fake('public');
+
+        $user = User::where('email', 'admin@portfolio.com')->first();
+        $file = UploadedFile::fake()->image('thumbnail.jpg');
+
+        $response = $this->actingAs($user, 'sanctum')->postJson('/api/v1/admin/upload', [
+            'file' => $file,
+            'folder' => 'thumbnails',
+        ]);
+
+        $response->assertStatus(201)
+            ->assertJsonStructure([
+                'status',
+                'message',
+                'data' => ['url', 'path', 'original_name'],
+            ]);
     }
 }
 

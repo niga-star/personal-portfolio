@@ -4,10 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ContactRequest;
+use App\Mail\ContactMessageReceived;
 use App\Models\Message;
+use App\Models\ProfileSetting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class ContactController extends Controller
 {
@@ -29,8 +32,20 @@ class ContactController extends Controller
             'ip_address' => $request->ip(),
         ]);
 
-        // Log notification simulation (or Mail::queue if mail server configured)
+        // 1. Log notification
         Log::info("አዲስ መልዕክት ከ {$message->sender_name} ({$message->sender_email}) ተልኳል: {$message->message}");
+
+        // 2. Dispatch email notification via configured SMTP / Mail service (Resend/Gmail/Log)
+        try {
+            $profile = ProfileSetting::first();
+            $recipient = $profile?->email ?: config('mail.from.address', 'admin@portfolio.com');
+
+            if ($recipient && filter_var($recipient, FILTER_VALIDATE_EMAIL)) {
+                Mail::to($recipient)->send(new ContactMessageReceived($message));
+            }
+        } catch (\Throwable $e) {
+            Log::warning("Could not dispatch contact email (will fallback to DB & Log): " . $e->getMessage());
+        }
 
         return response()->json([
             'status' => 'success',

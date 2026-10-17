@@ -118,6 +118,10 @@ const loadAllData = async () => {
     if (profileRes.data?.data) {
       profile.value = profileRes.data.data.profile || {}
       experiences.value = profileRes.data.data.experiences || []
+
+      if (profile.value.developer_name && profile.value.brand_name) {
+        document.title = `${profile.value.brand_name} | ${profile.value.developer_name}`
+      }
     }
 
     if (projectsRes.data?.data) {

@@ -294,13 +294,23 @@
 
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label class="block text-xs font-semibold text-slate-300 mb-1">Thumbnail URL</label>
-                  <input
-                    v-model="projectForm.thumbnail_url"
-                    placeholder="https://..."
-                    class="w-full px-3 py-2 rounded-lg bg-black/50 border text-white text-xs focus:outline-none focus:border-cyan-400"
-                    :class="projectErrors.thumbnail_url ? 'border-rose-500' : 'border-white/10'"
-                  />
+                  <div class="flex items-center justify-between mb-1">
+                    <label class="block text-xs font-semibold text-slate-300">Thumbnail URL / Image</label>
+                    <label class="text-[11px] text-cyan-400 hover:text-cyan-300 cursor-pointer flex items-center space-x-1">
+                      <span v-if="uploadingThumbnail">Uploading...</span>
+                      <span v-else>📁 Upload Image</span>
+                      <input type="file" accept="image/*" class="hidden" @change="handleUploadProjectThumbnail" :disabled="uploadingThumbnail" />
+                    </label>
+                  </div>
+                  <div class="flex items-center space-x-2">
+                    <input
+                      v-model="projectForm.thumbnail_url"
+                      placeholder="https://... or upload from PC"
+                      class="w-full px-3 py-2 rounded-lg bg-black/50 border text-white text-xs focus:outline-none focus:border-cyan-400"
+                      :class="projectErrors.thumbnail_url ? 'border-rose-500' : 'border-white/10'"
+                    />
+                    <img v-if="projectForm.thumbnail_url" :src="projectForm.thumbnail_url" class="w-8 h-8 rounded object-cover border border-cyan-500/30 shrink-0" />
+                  </div>
                   <span v-if="projectErrors.thumbnail_url" class="text-xs text-rose-400 mt-1 block">{{ projectErrors.thumbnail_url[0] }}</span>
                 </div>
                 <div>
@@ -713,6 +723,36 @@
               <div>
                 <label class="block text-xs font-semibold text-slate-300 mb-1">About Bio</label>
                 <textarea v-model="profileForm.about_bio" rows="3" class="w-full px-3 py-2 rounded-lg bg-[#080d19] border border-white/10 text-white text-xs focus:outline-none focus:border-cyan-400"></textarea>
+              </div>
+
+              <!-- Avatar & CV File Upload -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <div class="flex items-center justify-between mb-1">
+                    <label class="block text-xs font-semibold text-slate-300">Avatar Image</label>
+                    <label class="text-[11px] text-cyan-400 hover:text-cyan-300 cursor-pointer flex items-center space-x-1">
+                      <span v-if="uploadingAvatar">Uploading...</span>
+                      <span v-else>📁 Upload Avatar</span>
+                      <input type="file" accept="image/*" class="hidden" @change="handleUploadAvatar" :disabled="uploadingAvatar" />
+                    </label>
+                  </div>
+                  <div class="flex items-center space-x-2">
+                    <input v-model="profileForm.avatar_url" placeholder="https://... or upload" class="w-full px-3 py-2 rounded-lg bg-[#080d19] border border-white/10 text-white text-xs focus:outline-none focus:border-cyan-400" />
+                    <img v-if="profileForm.avatar_url" :src="profileForm.avatar_url" class="w-8 h-8 rounded-full object-cover border border-cyan-500/40 shrink-0" />
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex items-center justify-between mb-1">
+                    <label class="block text-xs font-semibold text-slate-300">CV URL / PDF Document</label>
+                    <label class="text-[11px] text-emerald-400 hover:text-emerald-300 cursor-pointer flex items-center space-x-1">
+                      <span v-if="uploadingCv">Uploading...</span>
+                      <span v-else>📄 Upload CV (PDF)</span>
+                      <input type="file" accept=".pdf" class="hidden" @change="handleUploadCv" :disabled="uploadingCv" />
+                    </label>
+                  </div>
+                  <input v-model="profileForm.cv_url" placeholder="/api/v1/download-cv or file URL" class="w-full px-3 py-2 rounded-lg bg-[#080d19] border border-white/10 text-white text-xs focus:outline-none focus:border-cyan-400" />
+                </div>
               </div>
 
               <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
@@ -1248,6 +1288,56 @@ const handleChangePassword = async () => {
     }
   } finally {
     passwordSaving.value = false
+  }
+}
+
+// 8. Direct File & Image Upload Handlers
+const uploadingThumbnail = ref(false)
+const uploadingAvatar = ref(false)
+const uploadingCv = ref(false)
+
+const handleUploadProjectThumbnail = async (event) => {
+  const file = event.target.files?.[0]
+  if (!file) return
+  uploadingThumbnail.value = true
+  try {
+    const res = await api.uploadFile(file, 'thumbnails')
+    projectForm.thumbnail_url = res.data.data.url
+  } catch (err) {
+    alert('የምስል ጭነት ስህተት: ' + (err.response?.data?.message || err.message))
+  } finally {
+    uploadingThumbnail.value = false
+    event.target.value = ''
+  }
+}
+
+const handleUploadAvatar = async (event) => {
+  const file = event.target.files?.[0]
+  if (!file) return
+  uploadingAvatar.value = true
+  try {
+    const res = await api.uploadFile(file, 'avatars')
+    profileForm.avatar_url = res.data.data.url
+  } catch (err) {
+    alert('የአቫታር ጭነት ስህተት: ' + (err.response?.data?.message || err.message))
+  } finally {
+    uploadingAvatar.value = false
+    event.target.value = ''
+  }
+}
+
+const handleUploadCv = async (event) => {
+  const file = event.target.files?.[0]
+  if (!file) return
+  uploadingCv.value = true
+  try {
+    const res = await api.uploadFile(file, 'cv')
+    profileForm.cv_url = res.data.data.url
+  } catch (err) {
+    alert('የሲቪ ጭነት ስህተት: ' + (err.response?.data?.message || err.message))
+  } finally {
+    uploadingCv.value = false
+    event.target.value = ''
   }
 }
 </script>

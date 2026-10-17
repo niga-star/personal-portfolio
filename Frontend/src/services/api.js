@@ -115,6 +115,18 @@ export const api = {
   updateProfile(data) {
     return apiClient.put('/admin/profile', data)
   },
+
+  // Direct File / Image Upload
+  uploadFile(file, folder = 'general') {
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('folder', folder)
+    return apiClient.post('/admin/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+  },
 }
 
 export default apiClient

@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\SkillController;
+use App\Http\Controllers\Api\UploadController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -32,6 +33,9 @@ Route::prefix('v1')->group(function () {
         Route::get('/auth/user', [AuthController::class, 'user']);
         Route::post('/auth/logout', [AuthController::class, 'logout']);
         Route::post('/admin/change-password', [AuthController::class, 'changePassword']);
+
+        // Direct File & Image Upload (Multipart)
+        Route::post('/admin/upload', [UploadController::class, 'upload']);
 
         // Admin Projects CRUD
         Route::post('/admin/projects', [ProjectController::class, 'store']);
