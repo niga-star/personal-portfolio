@@ -1,26 +1,16 @@
 <template>
-  <section class="py-14 relative z-10">
+  <section class="py-12 sm:py-16 relative z-10">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       
-      <!-- Section Header (Screenshot 2) -->
-      <div class="text-center mb-10">
-        <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">
-          Interactive Stats Counters
-        </h2>
-        <p class="text-slate-400 text-xs sm:text-sm mt-1">
-          High-fidelity conditions and exquisite stats counters.
-        </p>
-      </div>
-
-      <!-- Stats Grid (Screenshots 2 & 4) -->
+      <!-- Stats Grid -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
         <div
           v-for="(item, idx) in displayStats"
           :key="idx"
-          class="relative group rounded-2xl p-[1px] transition-all duration-300"
+          class="relative group rounded-2xl p-[1px] transition-all duration-300 hover:-translate-y-1"
           :class="getCardBorderClass(item.accent)"
         >
-          <div class="h-full bg-[#0E1424]/80 backdrop-blur-md rounded-2xl p-6 flex flex-col items-center text-center transition-all group-hover:bg-[#121a30]">
+          <div class="h-full bg-[#0E1424]/85 backdrop-blur-md rounded-2xl p-5 sm:p-6 flex flex-col items-center text-center transition-all group-hover:bg-[#121a30]">
             
             <!-- Value with neon glow -->
             <span

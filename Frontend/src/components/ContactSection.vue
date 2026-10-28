@@ -8,9 +8,15 @@
       <!-- Outer Framed Glass Container (Screenshot 1) -->
       <div class="relative rounded-3xl p-6 sm:p-10 lg:p-12 bg-[#0a0f1d]/90 border border-white/10 backdrop-blur-2xl shadow-[0_0_60px_rgba(0,0,0,0.6)]">
         
-        <!-- Breadcrumb (Screenshot 1) -->
+        <!-- Breadcrumb -->
         <div class="flex items-center space-x-2 text-xs font-mono text-slate-400 mb-6">
-          <a href="#hero" class="hover:text-cyan-400 transition-colors">Home</a>
+          <button
+            type="button"
+            @click="$emit('navigate-page', 'home')"
+            class="hover:text-cyan-400 transition-colors flex items-center space-x-1 cursor-pointer"
+          >
+            <span>Home</span>
+          </button>
           <span>&gt;</span>
           <span class="text-slate-200">Contact</span>
         </div>
@@ -246,6 +252,8 @@ defineProps({
     default: () => ({}),
   }
 })
+
+defineEmits(['navigate-page'])
 
 const form = reactive({
   name: '',
