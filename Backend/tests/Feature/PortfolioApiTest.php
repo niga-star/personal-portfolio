@@ -138,6 +138,88 @@ class PortfolioApiTest extends TestCase
     }
 
     /**
+     * Test name must only contain letters/spaces and be 3-30 characters
+     */
+    public function test_contact_name_validation_rules(): void
+    {
+        // Numbers in name
+        $res1 = $this->postJson('/api/v1/contact', [
+            'name' => 'John Doe 123',
+            'email' => 'valid@example.com',
+            'message' => 'This is a valid length message for the test.',
+        ]);
+        $res1->assertStatus(422)->assertJsonValidationErrors(['name']);
+
+        // Special characters in name
+        $res2 = $this->postJson('/api/v1/contact', [
+            'name' => 'John @ Doe!',
+            'email' => 'valid@example.com',
+            'message' => 'This is a valid length message for the test.',
+        ]);
+        $res2->assertStatus(422)->assertJsonValidationErrors(['name']);
+
+        // Too short (< 3 chars)
+        $res3 = $this->postJson('/api/v1/contact', [
+            'name' => 'Al',
+            'email' => 'valid@example.com',
+            'message' => 'This is a valid length message for the test.',
+        ]);
+        $res3->assertStatus(422)->assertJsonValidationErrors(['name']);
+
+        // Too long (> 30 chars)
+        $res4 = $this->postJson('/api/v1/contact', [
+            'name' => str_repeat('a', 31),
+            'email' => 'valid@example.com',
+            'message' => 'This is a valid length message for the test.',
+        ]);
+        $res4->assertStatus(422)->assertJsonValidationErrors(['name']);
+    }
+
+    /**
+     * Test email validation rejects disposable domains and malformed emails
+     */
+    public function test_contact_email_rejects_disposable_and_fake_emails(): void
+    {
+        // Disposable domain
+        $res1 = $this->postJson('/api/v1/contact', [
+            'name' => 'Jane Smith',
+            'email' => 'test@tempmail.com',
+            'message' => 'This is a valid length message for the test.',
+        ]);
+        $res1->assertStatus(422)->assertJsonValidationErrors(['email']);
+
+        // Mailinator
+        $res2 = $this->postJson('/api/v1/contact', [
+            'name' => 'Jane Smith',
+            'email' => 'test@mailinator.com',
+            'message' => 'This is a valid length message for the test.',
+        ]);
+        $res2->assertStatus(422)->assertJsonValidationErrors(['email']);
+    }
+
+    /**
+     * Test message validation requires at least 15 characters
+     */
+    public function test_contact_message_minimum_fifteen_characters(): void
+    {
+        // Exactly 14 characters (1 character too short)
+        $res = $this->postJson('/api/v1/contact', [
+            'name' => 'Jane Smith',
+            'email' => 'jane@example.com',
+            'message' => '12345678901234',
+        ]);
+        $res->assertStatus(422)->assertJsonValidationErrors(['message']);
+
+        // Exactly 15 characters (should pass)
+        $resValid = $this->postJson('/api/v1/contact', [
+            'name' => 'Jane Smith',
+            'email' => 'jane@example.com',
+            'message' => '123456789012345',
+        ]);
+        $resValid->assertStatus(201);
+    }
+
+    /**
      * Test protected admin endpoints require authentication with 401 Unauthorized (SRS 6.2)
      */
     public function test_protected_admin_routes_reject_unauthenticated_requests(): void

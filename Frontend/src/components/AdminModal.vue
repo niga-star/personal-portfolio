@@ -56,27 +56,35 @@
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Email (ኢሜይል)</label>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Email (ኢሜይል) *</label>
             <input
               v-model="loginEmail"
               type="email"
               placeholder="admin@portfolio.com"
-              class="w-full px-4 py-2.5 rounded-xl bg-[#080d19] border text-white text-sm focus:outline-none focus:border-cyan-400 transition-colors"
-              :class="loginErrors.email ? 'border-rose-500' : 'border-white/10'"
+              @input="handleLoginInput('email')"
+              @blur="handleLoginBlur('email')"
+              class="w-full px-4 py-2.5 rounded-xl bg-[#080d19] border text-white text-sm focus:outline-none transition-colors"
+              :class="getLoginInputClass('email')"
             />
-            <span v-if="loginErrors.email" class="text-xs text-rose-400 mt-1 block">{{ loginErrors.email[0] }}</span>
+            <span v-if="loginErrors.email" class="text-xs text-rose-400 mt-1 block">
+              {{ Array.isArray(loginErrors.email) ? loginErrors.email[0] : loginErrors.email }}
+            </span>
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Password (የይለፍ ቃል)</label>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Password (የይለፍ ቃል) *</label>
             <input
               v-model="loginPassword"
               type="password"
               placeholder="••••••••"
-              class="w-full px-4 py-2.5 rounded-xl bg-[#080d19] border text-white text-sm focus:outline-none focus:border-cyan-400 transition-colors"
-              :class="loginErrors.password ? 'border-rose-500' : 'border-white/10'"
+              @input="handleLoginInput('password')"
+              @blur="handleLoginBlur('password')"
+              class="w-full px-4 py-2.5 rounded-xl bg-[#080d19] border text-white text-sm focus:outline-none transition-colors"
+              :class="getLoginInputClass('password')"
             />
-            <span v-if="loginErrors.password" class="text-xs text-rose-400 mt-1 block">{{ loginErrors.password[0] }}</span>
+            <span v-if="loginErrors.password" class="text-xs text-rose-400 mt-1 block">
+              {{ Array.isArray(loginErrors.password) ? loginErrors.password[0] : loginErrors.password }}
+            </span>
           </div>
 
           <div class="text-[11px] text-slate-400 bg-white/5 p-2.5 rounded-xl border border-white/5">
@@ -808,10 +816,14 @@
                   v-model="passwordForm.current_password"
                   type="password"
                   placeholder="••••••••"
-                  class="w-full px-3 py-2 rounded-lg bg-black/50 border text-white text-xs focus:outline-none focus:border-cyan-400"
-                  :class="passwordErrors.current_password ? 'border-rose-500' : 'border-white/10'"
+                  @input="handlePasswordInput('current_password')"
+                  @blur="handlePasswordBlur('current_password')"
+                  class="w-full px-3 py-2 rounded-lg bg-black/50 border text-white text-xs focus:outline-none transition-colors"
+                  :class="getPasswordInputClass('current_password')"
                 />
-                <span v-if="passwordErrors.current_password" class="text-xs text-rose-400 mt-1 block">{{ passwordErrors.current_password[0] }}</span>
+                <span v-if="passwordErrors.current_password" class="text-xs text-rose-400 mt-1 block">
+                  {{ Array.isArray(passwordErrors.current_password) ? passwordErrors.current_password[0] : passwordErrors.current_password }}
+                </span>
               </div>
 
               <div>
@@ -820,10 +832,14 @@
                   v-model="passwordForm.new_password"
                   type="password"
                   placeholder="••••••••"
-                  class="w-full px-3 py-2 rounded-lg bg-black/50 border text-white text-xs focus:outline-none focus:border-cyan-400"
-                  :class="passwordErrors.new_password ? 'border-rose-500' : 'border-white/10'"
+                  @input="handlePasswordInput('new_password')"
+                  @blur="handlePasswordBlur('new_password')"
+                  class="w-full px-3 py-2 rounded-lg bg-black/50 border text-white text-xs focus:outline-none transition-colors"
+                  :class="getPasswordInputClass('new_password')"
                 />
-                <span v-if="passwordErrors.new_password" class="text-xs text-rose-400 mt-1 block">{{ passwordErrors.new_password[0] }}</span>
+                <span v-if="passwordErrors.new_password" class="text-xs text-rose-400 mt-1 block">
+                  {{ Array.isArray(passwordErrors.new_password) ? passwordErrors.new_password[0] : passwordErrors.new_password }}
+                </span>
               </div>
 
               <div>
@@ -832,8 +848,14 @@
                   v-model="passwordForm.new_password_confirmation"
                   type="password"
                   placeholder="••••••••"
-                  class="w-full px-3 py-2 rounded-lg bg-black/50 border border-white/10 text-white text-xs focus:outline-none focus:border-cyan-400"
+                  @input="handlePasswordInput('new_password_confirmation')"
+                  @blur="handlePasswordBlur('new_password_confirmation')"
+                  class="w-full px-3 py-2 rounded-lg bg-black/50 border text-white text-xs focus:outline-none transition-colors"
+                  :class="getPasswordInputClass('new_password_confirmation')"
                 />
+                <span v-if="passwordErrors.new_password_confirmation" class="text-xs text-rose-400 mt-1 block">
+                  {{ Array.isArray(passwordErrors.new_password_confirmation) ? passwordErrors.new_password_confirmation[0] : passwordErrors.new_password_confirmation }}
+                </span>
               </div>
 
               <button
@@ -883,6 +905,10 @@ const loginPassword = ref('Password123!')
 const loginLoading = ref(false)
 const loginGeneralError = ref('')
 const loginErrors = ref({})
+const loginTouched = reactive({
+  email: false,
+  password: false,
+})
 
 const activeTab = ref('messages')
 const adminTabs = [
@@ -963,6 +989,11 @@ const passwordForm = reactive({
   new_password: '',
   new_password_confirmation: '',
 })
+const passwordTouched = reactive({
+  current_password: false,
+  new_password: false,
+  new_password_confirmation: false,
+})
 
 watch(() => props.currentProfile, (newVal) => {
   if (newVal) {
@@ -1000,10 +1031,77 @@ onUnmounted(() => {
   window.removeEventListener('auth:unauthorized', handleUnauthorized)
 })
 
-// 1. Authentication Handlers
+// 1. Authentication Handlers & Real-Time Validation
+const validateLoginEmail = () => {
+  const val = loginEmail.value.trim()
+  if (!val) {
+    loginErrors.value = { ...loginErrors.value, email: ['እባክዎ ኢሜይል ያስገቡ (Email address is required).'] }
+    return false
+  }
+  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/
+  if (!emailRegex.test(val)) {
+    loginErrors.value = { ...loginErrors.value, email: ['እባክዎ ትክክለኛ የኢሜይል ቅርጸት ያስገቡ (Valid email format required, e.g. admin@portfolio.com).'] }
+    return false
+  }
+  const newErr = { ...loginErrors.value }
+  delete newErr.email
+  loginErrors.value = newErr
+  return true
+}
+
+const validateLoginPassword = () => {
+  const val = loginPassword.value
+  if (!val) {
+    loginErrors.value = { ...loginErrors.value, password: ['እባክዎ የይለፍ ቃል ያስገቡ (Password is required).'] }
+    return false
+  }
+  if (val.length < 6) {
+    loginErrors.value = { ...loginErrors.value, password: ['የይለፍ ቃል ቢያንስ 6 ፊደላት መሆን አለበት (Password must be at least 6 characters).'] }
+    return false
+  }
+  const newErr = { ...loginErrors.value }
+  delete newErr.password
+  loginErrors.value = newErr
+  return true
+}
+
+const handleLoginInput = (field) => {
+  if (loginTouched[field] || loginErrors.value[field]) {
+    if (field === 'email') validateLoginEmail()
+    if (field === 'password') validateLoginPassword()
+  }
+}
+
+const handleLoginBlur = (field) => {
+  loginTouched[field] = true
+  if (field === 'email') validateLoginEmail()
+  if (field === 'password') validateLoginPassword()
+}
+
+const getLoginInputClass = (field) => {
+  if (loginTouched[field] && loginErrors.value[field]) {
+    return 'border-rose-500/80 focus:border-rose-400 focus:ring-1 focus:ring-rose-400'
+  }
+  if (loginTouched[field] && !loginErrors.value[field] && (field === 'email' ? loginEmail.value.trim() : loginPassword.value)) {
+    return 'border-emerald-500/60 focus:border-emerald-400'
+  }
+  return 'border-white/10 focus:border-cyan-400'
+}
+
 const handleLogin = async () => {
-  loginLoading.value = true
+  loginTouched.email = true
+  loginTouched.password = true
   loginGeneralError.value = ''
+
+  const isEmailValid = validateLoginEmail()
+  const isPassValid = validateLoginPassword()
+
+  if (!isEmailValid || !isPassValid) {
+    loginGeneralError.value = 'እባክዎ መረጃዎን በትክክል ያስገቡ (Please fill in valid authentication credentials).'
+    return
+  }
+
+  loginLoading.value = true
   loginErrors.value = {}
 
   try {
@@ -1267,11 +1365,82 @@ const handleSaveProfile = async () => {
   }
 }
 
-// 7. Security Handlers
+// 7. Security Handlers & Real-Time Validation
+const validatePasswordChangeField = (field) => {
+  const newErr = { ...passwordErrors.value }
+  
+  if (field === 'current_password') {
+    if (!passwordForm.current_password) {
+      newErr.current_password = ['እባክዎ አሁን ያለውን የይለፍ ቃል ያስገቡ (Current password is required).']
+    } else {
+      delete newErr.current_password
+    }
+  }
+
+  if (field === 'new_password') {
+    if (!passwordForm.new_password) {
+      newErr.new_password = ['እባክዎ አዲስ የይለፍ ቃል ያስገቡ (New password is required).']
+    } else if (passwordForm.new_password.length < 8) {
+      newErr.new_password = ['አዲሱ የይለፍ ቃል ቢያንስ 8 ፊደላት መሆን አለበት (New password must be at least 8 characters).']
+    } else if (passwordForm.current_password && passwordForm.new_password === passwordForm.current_password) {
+      newErr.new_password = ['አዲሱ የይለፍ ቃል ከአሮጌው የተለየ መሆን አለበት (New password must be different from current password).']
+    } else {
+      delete newErr.new_password
+    }
+  }
+
+  if (field === 'new_password_confirmation' || (field === 'new_password' && passwordTouched.new_password_confirmation)) {
+    if (!passwordForm.new_password_confirmation) {
+      newErr.new_password_confirmation = ['የይለፍ ቃል ማረጋገጫ ያስገቡ (Confirmation is required).']
+    } else if (passwordForm.new_password_confirmation !== passwordForm.new_password) {
+      newErr.new_password_confirmation = ['የይለፍ ቃል ማረጋገጫው አልተመሳሰለም (Passwords do not match).']
+    } else {
+      delete newErr.new_password_confirmation
+    }
+  }
+
+  passwordErrors.value = newErr
+  return !passwordErrors.value[field]
+}
+
+const handlePasswordInput = (field) => {
+  if (passwordTouched[field] || passwordErrors.value[field]) {
+    validatePasswordChangeField(field)
+  }
+}
+
+const handlePasswordBlur = (field) => {
+  passwordTouched[field] = true
+  validatePasswordChangeField(field)
+}
+
+const getPasswordInputClass = (field) => {
+  if (passwordTouched[field] && passwordErrors.value[field]) {
+    return 'border-rose-500/80 focus:border-rose-400'
+  }
+  if (passwordTouched[field] && !passwordErrors.value[field] && passwordForm[field]) {
+    return 'border-emerald-500/60 focus:border-emerald-400'
+  }
+  return 'border-white/10 focus:border-cyan-400'
+}
+
 const handleChangePassword = async () => {
-  passwordSaving.value = true
+  passwordTouched.current_password = true
+  passwordTouched.new_password = true
+  passwordTouched.new_password_confirmation = true
   securityNotice.value = ''
   securityGeneralError.value = ''
+
+  const v1 = validatePasswordChangeField('current_password')
+  const v2 = validatePasswordChangeField('new_password')
+  const v3 = validatePasswordChangeField('new_password_confirmation')
+
+  if (!v1 || !v2 || !v3) {
+    securityGeneralError.value = 'እባክዎ የተገለጹትን ስህተቶች ያስተካክሉ (Please fix highlighted validation errors).'
+    return
+  }
+
+  passwordSaving.value = true
   passwordErrors.value = {}
 
   try {
@@ -1280,6 +1449,9 @@ const handleChangePassword = async () => {
     passwordForm.current_password = ''
     passwordForm.new_password = ''
     passwordForm.new_password_confirmation = ''
+    passwordTouched.current_password = false
+    passwordTouched.new_password = false
+    passwordTouched.new_password_confirmation = false
   } catch (err) {
     if (err.response?.status === 422) {
       passwordErrors.value = err.response.data.errors || {}
